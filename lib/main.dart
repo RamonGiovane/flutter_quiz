@@ -1,70 +1,96 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_quiz/answer.dart';
+import 'package:flutter_quiz/result.dart';
 import './question.dart';
 
 main() => runApp(QuizApp());
 
 class QuizApp extends StatefulWidget {
-
   @override
-  _QuizAppState createState() {    
+  _QuizAppState createState() {
     return _QuizAppState();
   }
-
 }
 
-class _QuizAppState extends State<QuizApp>{
-  var _questionIndex = 0;
-  
-  @override
-  Widget build(BuildContext context){
-  
-    final List<Map<String, Object>> questions = 
-    [
-      { 'text': "Is Dart strongly or weakly typed?", 'answers': ["Strongly typed", "Weakly typed", "None. Medium typed"]},
-      { 'text': "Which company builted Flutter and Dart?", 'answers': ['Microsoft', 'Google', 'Zucc']}, 
-      { 'text': "Which keyword is used to declare private members in Dart", 'answers': ['Underscore', 'private', 'None. It is not possible.']}
-    ];
+class _QuizAppState extends State<QuizApp> {
+  int _questionIndex = 0;
 
-    List<String> answers = questions[_questionIndex]['answers'];
+  int _score = 0;
+
+  final _questions = const [
+    {
+      'text': "Is Dart strongly or weakly typed?",
+      'answers': [
+        {'text': "Strongly typed", 'correct': true},
+        {'text': "Weakly typed", 'correct': false},
+        {'text': "None. Medium typed", 'correct': false}
+      ],
+    },
+
+    {
+      'text': "Which company builted Flutter and Dart?",
+      'answers': [
+        {'text': 'Microsoft', 'correct': false},
+        {'text': 'Google', 'correct': true},
+        {'text': 'Zucc', 'correct': false}
+      ]
+    },
+
+    {
+      'text': "Which keyword is used to declare private members in Dart?",
+      'answers': [
+        {'text': 'Underscore', 'correct': true},
+        {'text': 'private', 'correct': false},
+        {'text': 'None. It is not possible.', 'correct': false}
+      ]
+    }
+  ];
+
+  
+  bool get wasSelection {
+    return _questionIndex < _questions.length;
+  }
+
+  @override
+  Widget build(BuildContext context) {
    
-    List<Widget> widgets = answers
-      .map((t) => AnswerWidget(t, _answer))
-      .toList();
-    
     return MaterialApp(
       home: Scaffold(
-        
         appBar: AppBar(
           title: Text("Flutter Quiz"),
         ),
-
-        body: Column(
-          children: <Widget>[
+        body: 
+        
+        wasSelection ?
             
-            QuestionWidget(questions[_questionIndex]['text']),
-            
-            ...answers.map((t) => AnswerWidget(t, _answer)).toList(),
-            
-            // AnswerWidget("Answer 1", _answer),
+            QuizWidget(
+                questions: _questions,
+                selectedQuestion: _questionIndex,
+                onAnswer: _answer,
+              )
 
-            // AnswerWidget("Answer 2", _answer),
+            : ResultWidget(_score, _restartQuiz),
 
-            // AnswerWidget("Answer 3", _answer),
-
-          ],
-        )
-        )
-      );  
-    
+      ),
+    );
   }
 
-  void _answer(){
+  void _answer(bool isCorrect) {
     
-    setState( () => _questionIndex++ );
+    if (wasSelection) setState(() => ++_questionIndex);
+    
+    _score += isCorrect ? 1 : 0;
     
     print("Answer given");
   }
+
+  void _restartQuiz(){
+    
+    setState( () 
+    {
+      _questionIndex = 0;
+      _score = 0;
+    });
+  }
+
+
 }
-
-
